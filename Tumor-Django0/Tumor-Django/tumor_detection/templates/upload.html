@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brain Tumor Classifier</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #1f1c2c, #928DAB);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      animation: fadeInBody 1s ease;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    input[type="file"] {
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    button[type="submit"] {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+    }
+
+    img {
+      max-width: 100%;
+      border-radius: 15px;
+      margin-top: 20px;
+      border: 3px solid #ffffff44;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #333;
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .modal-header {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #0072ff;
+    }
+
+    .modal-body {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 10px auto;
+      width: fit-content;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .ok-button {
+      margin-top: 20px;
+      background: #28a745;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .ok-button:hover {
+      background: #218838;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 Brain Tumor Classifier</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="image" accept="image/*" required />
+      <br>
+      <button type="submit">Upload & Classify</button>
+    </form>
+
+    {% if file_url %}
+      <div>
+        <h2 style="margin-top: 30px;">Preview:</h2>
+        <img src="{{ file_url }}" alt="Uploaded Image">
+      </div>
+    {% endif %}
+  </div>
+
+  {% if predicted_class %}
+    <!-- Modal -->
+    <div id="customModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">Classification Result</div>
+        <div class="modal-body" id="tumorResult">
+          <p><strong>{{ predicted_class }}</strong></p>
+        </div>
+        <button class="ok-button" onclick="closeModal()">OK</button>
+      </div>
+    </div>
+
+    <script>
+      window.onload = function () {
+        const modal = document.getElementById('customModal');
+        const result = "{{ predicted_class|lower }}";
+        const resultBox = document.getElementById('tumorResult');
+
+        // Color coding based on tumor type
+        if (result.includes("no tumor")) {
+          resultBox.style.backgroundColor = "#d4edda";
+          resultBox.style.color = "#155724";
+        } else if (result.includes("glioma")) {
+          resultBox.style.backgroundColor = "#f8d7da";
+          resultBox.style.color = "#721c24";
+        } else if (result.includes("meningioma")) {
+          resultBox.style.backgroundColor = "#fff3cd";
+          resultBox.style.color = "#856404";
+        } else if (result.includes("pituitary")) {
+          resultBox.style.backgroundColor = "#d1ecf1";
+          resultBox.style.color = "#0c5460";
+        }
+
+        modal.style.display = 'block';
+      }
+
+      function closeModal() {
+        document.getElementById('customModal').style.display = 'none';
+      }
+    </script>
+  {% endif %}
+</body>
+</html>
